@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Supreme</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Poppins,system-ui,Arial;}
+  html,body{height:100%;}
+  body{
+    background:#020710;
+    color:#eaf6ff;
+    overflow-y:auto;
+    overflow-x:hidden;
+    min-height:100vh;
+    perspective:1000px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+  }
+
+  canvas#bg{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  .scene{
+    width:100%;
+    height:100%;
+    position:relative;
+    transform-style:preserve-3d;
+    transition:transform 0.45s ease;
+    z-index:2;
+  }
+  .scene.flipped{ transform: rotateY(180deg); }
+
+  .page{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    backface-visibility:hidden;
+    overflow-y:auto;
+    padding-bottom:80px;
+  }
+
+  .front, .back{ background:rgba(2,7,16,0.6); }
+
+  h1{
+    font-size:clamp(3rem,9vw,5.5rem);
+    color:#00d4ff;
+    text-shadow:0 0 24px rgba(0,212,255,0.8);
+    letter-spacing:1px;
+  }
+
+  .enter-text {
+    color:#bdefff;
+    margin-top:10px;
+    font-size:1rem;
+    opacity:0.8;
+    text-shadow:0 0 10px rgba(0,212,255,0.4);
+  }
+
+  .btn{
+    margin-top:28px;
+    padding:14px 40px;
+    border-radius:12px;
+    border:2px solid #00d4ff;
+    color:#00d4ff;
+    background:transparent;
+    cursor:pointer;
+    font-weight:600;
+    font-size:1.2rem;
+    box-shadow:0 0 20px rgba(0,212,255,0.15);
+    transition:all .2s ease;
+  }
+  .btn:hover{ background:#00d4ff; color:#001; box-shadow:0 0 40px rgba(0,212,255,0.7); }
+
+  .discord{
+    position:fixed;
+    top:20px;
+    right:20px;
+    z-index:3;
+    padding:10px 16px;
+    border-radius:10px;
+    border:2px solid #00d4ff;
+    color:#00d4ff;
+    text-decoration:none;
+    font-weight:600;
+    background:rgba(0,10,15,0.45);
+    box-shadow:0 0 18px rgba(0,212,255,0.12);
+  }
+  .discord:hover{ background:#00d4ff; color:#001; }
+
+  .back {
+    transform:rotateY(180deg);
+    padding-top:80px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+  }
+
+  .back .btn#back{ position:fixed; left:20px; top:20px; }
+
+  .content{
+    max-width:1000px;
+    width:100%;
+    text-align:center;
+    padding:40px;
+  }
+
+  .section{
+    margin-top:40px;
+    padding:30px;
+    border-radius:16px;
+    background:rgba(0,212,255,0.05);
+    box-shadow:0 0 25px rgba(0,212,255,0.08);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .section:hover{
+    transform:scale(1.03);
+    box-shadow:0 0 35px rgba(0,212,255,0.25);
+  }
+
+  .highlight{
+    background:radial-gradient(circle at center, rgba(0,212,255,0.15) 0%, rgba(0,212,255,0.05) 80%);
+    border:2px solid rgba(0,212,255,1);
+    box-shadow:
+      0 0 10px rgba(0,212,255,0.9),
+      0 0 30px rgba(0,212,255,0.6),
+      inset 0 0 20px rgba(0,212,255,0.4);
+    animation: pulseGlow 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%,100% {
+      box-shadow:
+        0 0 15px rgba(0,212,255,1),
+        0 0 35px rgba(0,212,255,0.7),
+        inset 0 0 25px rgba(0,212,255,0.5);
+      border-color:rgba(0,212,255,1);
+    }
+    50% {
+      box-shadow:
+        0 0 25px rgba(0,255,255,1),
+        0 0 55px rgba(0,212,255,0.9),
+        inset 0 0 30px rgba(0,255,255,0.6);
+      border-color:rgba(0,255,255,1);
+    }
+  }
+
+  .section h2{
+    color:#00e5ff;
+    text-shadow:0 0 22px rgba(0,255,255,0.9);
+    margin-bottom:16px;
+    font-size:2.1rem;
+    letter-spacing:1px;
+  }
+
+  .section ul{
+    list-style:none;
+    color:#c8e7ff;
+    font-size:1.15rem;
+    line-height:1.9;
+    text-align:center;
+    margin-bottom:15px;
+  }
+
+  .section p{
+    color:#c8e7ff;
+    line-height:1.6;
+    font-size:1.05rem;
+  }
+
+  .scene.flipped .front {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+  }
+</style>
+</head>
+<body>
+
+<a class="discord" href="https://discord.gg/6ZpjfdXKbf" target="_blank">Join Discord</a>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<div class="scene" id="scene">
+  <div class="page front">
+    <h1>Supreme</h1>
+    <p class="enter-text">Click Enter To Access Our Tool</p>
+    <button class="btn" id="enter">Enter</button>
+  </div>
+
+  <div class="page back">
+    <button class="btn" id="back">Back</button>
+    <div class="content">
+
+      <!-- SPLUNK -->
+      <div class="section highlight">
+        <h2>Supreme Splunk-X</h2>
+        <ul>
+          <li>🔰 Best For Gen</li>
+          <li>💀 Age Changer</li>
+          <li>💀 Auto Set-Email</li>
+        </ul>
+        <a href="https://app.splunk.gg/dashboard/settings" target="_blank" class="btn">Enter</a>
+      </div>
+
+      <!-- SHOCKIFY -->
+      <div class="section">
+        <h2>Supreme Shockify</h2>
+        <ul>
+          <li>💠 Premium Access</li>
+          <li>🌐 Instant Access</li>
+          <li>💀 Legit Link</li>
+          <li>💀 Age Forcer</li>    
+        </ul>
+        <a href="https://shockify.st/?code=MzAxMzkyNTE3Njg0NDA4Njg0NF80ODA0MzM4MTA0MDMzNzc4NjIz" target="_blank" class="btn">Enter</a>
+      </div>
+
+      <!-- INJURIES -->
+      <div class="section">
+        <h2>Supreme Injuries</h2>
+        <ul>
+          <li>🔰 Advanced Access</li>
+          <li>💀 Good Performance</li>
+          <li>👌 Instant Access</li>
+        </ul>
+        <a href="https://www.logged.tg/auth/supremeflares" target="_blank" class="btn">Enter</a>
+      </div>
+
+      <!-- BYPASSER -->
+      <div class="section">
+        <h2>Supreme Refresher</h2>
+        <ul>
+          <li>⚡ Fast Refresh Tool</li>
+          <li>🧠 Smart Auto Detection</li>
+          <li>🚀 One-Click Activation</li>
+        </ul>
+        <a href="https://logged.tg/tools/refresher" target="_blank" class="btn">Enter</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('bg'),ctx=canvas.getContext('2d',{alpha:true});
+const scene=document.getElementById('scene');
+const enterBtn=document.getElementById('enter');
+const backBtn=document.getElementById('back');
+
+enterBtn.onclick=()=>{
+  scene.classList.add('flipped');
+  document.querySelector('.front').classList.add('hidden');
+  setTimeout(()=>window.scrollTo({top:0,behavior:"smooth"}),300);
+};
+
+backBtn.onclick=()=>{
+  scene.classList.remove('flipped');
+  document.querySelector('.front').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+
+function resizeCanvas(){
+  const dpr=Math.max(1,window.devicePixelRatio||1);
+  canvas.width=Math.floor(innerWidth*dpr);
+  canvas.height=Math.floor(innerHeight*dpr);
+  canvas.style.width=innerWidth+'px';
+  canvas.style.height=innerHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+
+const drops=[],nodes=[];
+for(let i=0;i<45;i++){drops.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,len:8+Math.random()*20,speed:2+Math.random()*5,tilt:-0.5+Math.random()});}
+for(let i=0;i<18;i++){nodes.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3});}
+let lastWebUpdate=0;
+
+function draw(now){
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  ctx.strokeStyle='rgba(0,180,255,0.3)';ctx.lineWidth=1;
+  for(let p of drops){
+    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+p.tilt*p.len*0.4,p.y+p.len);ctx.stroke();
+    p.x+=p.tilt*0.35;p.y+=p.speed*(0.9+Math.random()*0.2);
+    if(p.y>innerHeight+20||p.x<-20||p.x>innerWidth+20){p.x=Math.random()*innerWidth;p.y=-10;}
+  }
+
+  if(!scene.classList.contains('flipped')){
+    if(now-lastWebUpdate>120){lastWebUpdate=now;
+      for(let n of nodes){n.x+=n.vx;n.y+=n.vy;
+        if(n.x<0||n.x>innerWidth)n.vx*=-1;
+        if(n.y<0||n.y>innerHeight)n.vy*=-1;}
+    }
+    ctx.strokeStyle='rgba(0,200,255,0.12)';
+    const linkDist=110;
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j];
+        const dx=a.x-b.x,dy=a.y-b.y,dist=Math.hypot(dx,dy);
+        if(dist<linkDist){
+          ctx.globalAlpha=(1-dist/linkDist)*0.35;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha=1;
+  }
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>
